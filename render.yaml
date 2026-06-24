@@ -22,7 +22,7 @@ services:
         value: onesol_db
 
   # 2. Private MySQL Database Service
-  - type: privateService
+  - type: pservice
     name: onesol-db
     env: docker
     plan: free
