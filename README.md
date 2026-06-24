@@ -1,5 +1,8 @@
 # 🖥️ One Point Solutions — Customer KYC & Rental Agreement System
 
+### 🌐 Live Website: [https://onesol-gamma.vercel.app/](https://onesol-gamma.vercel.app/)
+
+
 A full-stack web application for managing customer KYC verification and electronics rental agreements. Built for One Point Solutions to streamline the onboarding and rental process with a clean admin dashboard.
 
 ---
