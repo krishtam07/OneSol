@@ -9,8 +9,49 @@ const app  = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // ── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({ origin: ['http://localhost:8080', 'http://127.0.0.1:8080'] }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
+
+// ── Tunnel Proxy for Vercel ───────────────────────────────────────────────────
+if (process.env.VERCEL && process.env.TUNNEL_URL) {
+  app.use(async (req, res, next) => {
+    if (req.url.startsWith('/api')) {
+      try {
+        const targetUrl = `${process.env.TUNNEL_URL}${req.url}`;
+        const headers = {
+          'bypass-tunnel-reminder': 'true',
+          'content-type': req.headers['content-type'] || 'application/json'
+        };
+
+        if (req.headers['authorization']) {
+          headers['authorization'] = req.headers['authorization'];
+        }
+
+        const options = {
+          method: req.method,
+          headers
+        };
+
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+          options.body = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
+        }
+
+        const response = await fetch(targetUrl, options);
+        const text = await response.text();
+
+        res.setHeader('content-type', response.headers.get('content-type') || 'application/json');
+        res.status(response.status).send(text);
+      } catch (err) {
+        console.error('❌ Tunnel proxy error:', err.message);
+        res.status(502).json({ error: 'Tunnel offline or failed: ' + err.message });
+      }
+      return;
+    }
+    next();
+  });
+}
+
+
 
 // ── Request logger ────────────────────────────────────────────────────────────
 app.use((req, _res, next) => {
@@ -87,4 +128,9 @@ async function start() {
   }
 }
 
-start();
+if (!process.env.VERCEL) {
+  start();
+}
+
+module.exports = app;
+

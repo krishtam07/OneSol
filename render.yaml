@@ -1,0 +1,34 @@
+services:
+  # 1. Express backend Web Service
+  - type: web
+    name: onesol-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node setup.js && node index.js
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: DB_HOST
+        value: onesol-db
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: root
+      - key: DB_PASSWORD
+        value: onesol_secure_pass
+      - key: DB_NAME
+        value: onesol_db
+
+  # 2. Private MySQL Database Service
+  - type: privateService
+    name: onesol-db
+    env: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile.mysql
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        value: onesol_secure_pass
+      - key: MYSQL_DATABASE
+        value: onesol_db

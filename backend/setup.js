@@ -13,13 +13,26 @@ async function setup() {
   console.log('─'.repeat(45));
 
   // Connect without specifying a database first (so we can CREATE DATABASE)
-  const conn = await mysql.createConnection({
-    host:     process.env.DB_HOST     || 'localhost',
-    port:     parseInt(process.env.DB_PORT || '3306', 10),
-    user:     process.env.DB_USER     || 'root',
-    password: process.env.DB_PASSWORD || '',
-    multipleStatements: true
-  });
+  // Try connecting with retries since MySQL may take time to start up on Render
+  let conn;
+  let retries = 10;
+  while (retries > 0) {
+    try {
+      conn = await mysql.createConnection({
+        host:     process.env.DB_HOST     || 'localhost',
+        port:     parseInt(process.env.DB_PORT || '3306', 10),
+        user:     process.env.DB_USER     || 'root',
+        password: process.env.DB_PASSWORD || '',
+        multipleStatements: true
+      });
+      break;
+    } catch (err) {
+      retries--;
+      if (retries === 0) throw err;
+      console.log(`⏳ Database not ready yet... Retrying in 3 seconds. (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+  }
 
   try {
     const dbName = process.env.DB_NAME || 'onesol_db';
