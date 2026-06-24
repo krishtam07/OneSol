@@ -82,8 +82,7 @@ PORT=3001
 ```bash
 npm run dev
 ```
-- Frontend: http://127.0.0.1:8080
-- Backend API: http://localhost:3001
+
 
 ---
 
@@ -132,6 +131,4 @@ OneSol/
 
 ---
 
-## 📄 License
 
-This project is private and intended for internal use by One Point Solutions.
